@@ -55,9 +55,11 @@ internal fun AppItem(
     val gameSize = remember(appInfo.appId) {
         if (isInstalled) {
             StorageUtils.formatBinarySize(
-                StorageUtils.getFolderSize(SteamService.getAppDirPath(appInfo.appId))
+                StorageUtils.getFolderSize(SteamService.getAppDirPath(appInfo.appId)),
             )
-        } else ""
+        } else {
+            ""
+        }
     }
 
     // Modern card-style item with gradient hover effect
@@ -68,49 +70,49 @@ internal fun AppItem(
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
         ),
         border = androidx.compose.foundation.BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-        )
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // Game icon
             Box(
                 modifier = Modifier
                     .size(60.dp)
                     .clip(RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 ListItemImage(
                     modifier = Modifier.size(56.dp),
                     imageModifier = Modifier.clip(RoundedCornerShape(10.dp)),
-                    image = { appInfo.clientIconUrl }
+                    image = { appInfo.clientIconUrl },
                 )
             }
 
             // Game info
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text = appInfo.name,
                     style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     ),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Row(
                     modifier = Modifier.padding(top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     // Status indicator: Installing / Installed / Not installed
                     val statusText = when {
@@ -124,26 +126,26 @@ internal fun AppItem(
                     }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         // Status dot
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
-                                .background(color = statusColor, shape = CircleShape)
+                                .background(color = statusColor, shape = CircleShape),
                         )
                         // Status text
                         Text(
                             text = statusText,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = statusColor
+                            color = statusColor,
                         )
                         // Download percentage when installing
                         if (isDownloading) {
                             Text(
                                 text = "${(downloadProgress * 100).toInt()}%",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = statusColor
+                                color = statusColor,
                             )
                         }
                     }
@@ -152,13 +154,13 @@ internal fun AppItem(
                     if (isInstalled) {
                         Text(
                             text = " • ",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
 
                         Text(
                             text = gameSize,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
 
@@ -167,7 +169,7 @@ internal fun AppItem(
                         Text(
                             text = " • Family Shared",
                             style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
-                            color = MaterialTheme.colorScheme.tertiary
+                            color = MaterialTheme.colorScheme.tertiary,
                         )
                     }
                 }
@@ -177,16 +179,16 @@ internal fun AppItem(
             Button(
                 onClick = onClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.primary,
                 ),
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.height(40.dp)
+                modifier = Modifier.height(40.dp),
             ) {
                 Text(
                     text = "Open",
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    )
+                        fontWeight = FontWeight.Bold,
+                    ),
                 )
             }
         }
@@ -204,7 +206,7 @@ private fun Preview_AppItem() {
     PluviaTheme {
         Surface {
             LazyColumn(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             ) {
                 items(
                     items = List(5) { idx ->

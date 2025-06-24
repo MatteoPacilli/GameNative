@@ -55,7 +55,7 @@ private fun Preview_HomeScreenContent() {
             onClickPlay = { _, _ -> },
             onLogout = {},
             onSettings = {},
-            onClickExit = {}
+            onClickExit = {},
         )
     }
 }

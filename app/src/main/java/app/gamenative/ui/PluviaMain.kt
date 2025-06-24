@@ -58,11 +58,11 @@ import com.winlator.xenvironment.ImageFsInstaller
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects.ECloudPendingRemoteOperation
 import java.util.Date
 import java.util.EnumSet
+import kotlin.reflect.KFunction2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.reflect.KFunction2
 
 @Composable
 fun PluviaMain(

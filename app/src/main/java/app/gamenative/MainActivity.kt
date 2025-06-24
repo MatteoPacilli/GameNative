@@ -22,16 +22,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import coil.ImageLoader
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
-import coil.request.CachePolicy
 import app.gamenative.events.AndroidEvent
 import app.gamenative.service.SteamService
 import app.gamenative.ui.PluviaMain
 import app.gamenative.ui.enums.Orientation
 import app.gamenative.utils.AnimatedPngDecoder
 import app.gamenative.utils.IconDecoder
+import coil.ImageLoader
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
+import coil.request.CachePolicy
 import com.posthog.PostHog
 import com.skydoves.landscapist.coil.LocalCoilImageLoader
 import com.winlator.core.AppUtils
@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.rgb(30, 30, 30)),
-            navigationBarStyle = SystemBarStyle.light(TRANSPARENT, TRANSPARENT)
+            navigationBarStyle = SystemBarStyle.light(TRANSPARENT, TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
 

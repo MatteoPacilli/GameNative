@@ -74,8 +74,8 @@ import com.winlator.container.ContainerData
 import com.winlator.core.KeyValueSet
 import com.winlator.core.StringUtils
 import com.winlator.core.envvars.EnvVarInfo
-import com.winlator.core.envvars.EnvVars
 import com.winlator.core.envvars.EnvVarSelectionType
+import com.winlator.core.envvars.EnvVars
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,7 +126,7 @@ fun ContainerConfigDialog(
             val driverIndex = graphicsDrivers.indexOfFirst { StringUtils.parseIdentifier(it) == config.graphicsDriver }
             mutableIntStateOf(if (driverIndex >= 0) driverIndex else 0)
         }
-        
+
         // Function to get the appropriate version list based on the selected graphics driver
         fun getVersionsForDriver(): List<String> {
             val driverType = StringUtils.parseIdentifier(graphicsDrivers[graphicsDriverIndex])
@@ -136,7 +136,7 @@ fun ContainerConfigDialog(
                 else -> zinkVersions
             }
         }
-        
+
         var graphicsDriverVersionIndex by rememberSaveable {
             // Find the version in the list that matches the configured version
             val version = config.graphicsDriverVersion
@@ -513,7 +513,7 @@ fun ContainerConfigDialog(
                                     // Save both config and envVars
                                     config = config.copy(
                                         dxwrapperConfig = currentDxvkConfig.toString(),
-                                        envVars = envVarsSet.toString()
+                                        envVars = envVarsSet.toString(),
                                     )
                                 },
                             )
