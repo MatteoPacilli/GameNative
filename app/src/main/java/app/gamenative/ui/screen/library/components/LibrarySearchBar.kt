@@ -3,6 +3,8 @@ package app.gamenative.ui.screen.library.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -36,8 +38,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import timber.log.Timber
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
@@ -69,7 +69,7 @@ internal fun LibrarySearchBar(
     // Modern search field with rounded corners
     Box(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterStart
+        contentAlignment = Alignment.CenterStart,
     ) {
         TextField(
             value = state.searchQuery,
@@ -81,14 +81,14 @@ internal fun LibrarySearchBar(
             placeholder = {
                 Text(
                     text = "Search your games...",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )
             },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             },
             trailingIcon = {
@@ -99,9 +99,9 @@ internal fun LibrarySearchBar(
                             Icon(
                                 Icons.Default.Clear,
                                 contentDescription = "Clear search",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                        }
+                        },
                     )
                 }
             },
@@ -113,7 +113,7 @@ internal fun LibrarySearchBar(
             ),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { keyboardController?.hide() })
+            keyboardActions = KeyboardActions(onSearch = { keyboardController?.hide() }),
         )
     }
 

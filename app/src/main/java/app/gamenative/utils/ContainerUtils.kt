@@ -297,7 +297,7 @@ object ContainerUtils {
         if (manager.hasContainer(containerId)) {
             // Remove the container directory asynchronously
             manager.removeContainerAsync(
-                manager.getContainerById(containerId)
+                manager.getContainerById(containerId),
             ) {
                 Timber.i("Deleted container for appId=$appId (containerId=$containerId)")
             }

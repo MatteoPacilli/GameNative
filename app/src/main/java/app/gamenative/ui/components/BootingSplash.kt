@@ -23,18 +23,18 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BootingSplash(
     visible: Boolean = true,
-    onBootCompleted: () -> Unit = {}
+    onBootCompleted: () -> Unit = {},
 ) {
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(),
-        exit = fadeOut()
+        exit = fadeOut(),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
@@ -44,17 +44,17 @@ fun BootingSplash(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
                                 MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.tertiary
-                            )
-                        )
-                    )
+                                MaterialTheme.colorScheme.tertiary,
+                            ),
+                        ),
+                    ),
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Booting... (may take a few minutes on first launch)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
         }

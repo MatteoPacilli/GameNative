@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkRequest
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.IBinder
 import androidx.room.withTransaction
 import app.gamenative.BuildConfig
@@ -115,6 +115,7 @@ import java.util.Collections
 import java.util.EnumSet
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.io.path.pathString
 import kotlin.time.Duration.Companion.seconds
@@ -146,7 +147,6 @@ import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class SteamService : Service(), IChallengeUrlChanged {
@@ -279,9 +279,9 @@ class SteamService : Service(), IChallengeUrlChanged {
         val isLoginInProgress: Boolean
             get() = instance!!._loginResult == LoginResult.InProgress
 
-        private const val MAX_PARALLEL_DEPOTS   = 4     // instead of all 38
-        private const val CHUNKS_PER_DEPOT      = 8     // was 16
-        private const val CHUNK_TIMEOUT_MS      = 90_000   // was library default 15 s
+        private const val MAX_PARALLEL_DEPOTS = 4 // instead of all 38
+        private const val CHUNKS_PER_DEPOT = 8 // was 16
+        private const val CHUNK_TIMEOUT_MS = 90_000 // was library default 15 s
 
         fun widenH2Window(client: OkHttpClient) {
             try {
@@ -300,12 +300,17 @@ class SteamService : Service(), IChallengeUrlChanged {
             val http by lazy {
                 OkHttpClient.Builder()
                     .readTimeout(CHUNK_TIMEOUT_MS.toLong(), TimeUnit.MILLISECONDS)
-                    .dispatcher(Dispatcher().apply {
-                        maxRequests          = MAX_PARALLEL_DEPOTS * CHUNKS_PER_DEPOT
-                        maxRequestsPerHost   = MAX_PARALLEL_DEPOTS * CHUNKS_PER_DEPOT
-                    })
-                    .connectionPool(ConnectionPool(
-                        MAX_PARALLEL_DEPOTS * CHUNKS_PER_DEPOT, 5, TimeUnit.MINUTES))
+                    .dispatcher(
+                        Dispatcher().apply {
+                            maxRequests = MAX_PARALLEL_DEPOTS * CHUNKS_PER_DEPOT
+                            maxRequestsPerHost = MAX_PARALLEL_DEPOTS * CHUNKS_PER_DEPOT
+                        },
+                    )
+                    .connectionPool(
+                        ConnectionPool(
+                            MAX_PARALLEL_DEPOTS * CHUNKS_PER_DEPOT, 5, TimeUnit.MINUTES,
+                        ),
+                    )
                     .build()
                     .also { widenH2Window(it) }
             }
@@ -388,8 +393,13 @@ class SteamService : Service(), IChallengeUrlChanged {
             val depot = depotEntry.value
 
             (depot.manifests.isNotEmpty() || depot.sharedInstall) &&
-                (depot.osList.contains(OS.windows) || (!depot.osList.contains(OS.linux) && !depot.osList.contains(
-                    OS.macos))) &&
+                (
+                    depot.osList.contains(OS.windows) || (
+                        !depot.osList.contains(OS.linux) && !depot.osList.contains(
+                            OS.macos,
+                        )
+                        )
+                    ) &&
                 (depot.osArch == OSArch.Arch64 || depot.osArch == OSArch.Unknown) &&
                 (depot.dlcAppId == INVALID_APP_ID || getOwnedAppDlc(appId).containsKey(depot.dlcAppId))
         }.orEmpty()
@@ -408,14 +418,14 @@ class SteamService : Service(), IChallengeUrlChanged {
             // SteamKit-JVM (most forks) – flags is EnumSet<EDepotFileFlag>
             is EnumSet<*> -> {
                 flags.contains(EDepotFileFlag.Executable) ||
-                        flags.contains(EDepotFileFlag.CustomExecutable)
+                    flags.contains(EDepotFileFlag.CustomExecutable)
             }
 
             // SteamKit-C# protobuf port – flags is UInt / Int / Long
-            is Int  -> (flags and 0x20) != 0 || (flags and 0x80) != 0
+            is Int -> (flags and 0x20) != 0 || (flags and 0x80) != 0
             is Long -> ((flags and 0x20L) != 0L) || ((flags and 0x80L) != 0L)
 
-            else    -> false
+            else -> false
         }
 
         /* -------------------------------------------------------------------------- */
@@ -423,18 +433,23 @@ class SteamService : Service(), IChallengeUrlChanged {
         /* -------------------------------------------------------------------------- */
 
         // Unreal Engine “Shipping” binaries (e.g. Stray-Win64-Shipping.exe)
-        private val UE_SHIPPING = Regex(""".*-win(32|64)(-shipping)?\.exe$""",
-            RegexOption.IGNORE_CASE)
+        private val UE_SHIPPING = Regex(
+            """.*-win(32|64)(-shipping)?\.exe$""",
+            RegexOption.IGNORE_CASE,
+        )
 
         // UE folder hint …/Binaries/Win32|64/…
-        private val UE_BINARIES = Regex(""".*/binaries/win(32|64)/.*\.exe$""",
-            RegexOption.IGNORE_CASE)
+        private val UE_BINARIES = Regex(
+            """.*/binaries/win(32|64)/.*\.exe$""",
+            RegexOption.IGNORE_CASE,
+        )
 
         // Tools / crash-dumpers to push down
         private val NEGATIVE_KEYWORDS = listOf(
             "crash", "handler", "viewer", "compiler", "tool",
-            "setup", "unins", "eac", "launcher", "steam"
+            "setup", "unins", "eac", "launcher", "steam",
         )
+
         /* add near-name helper */
         private fun fuzzyMatch(a: String, b: String): Boolean {
             /* strip digits & punctuation, compare first 5 letters */
@@ -453,27 +468,27 @@ class SteamService : Service(), IChallengeUrlChanged {
         private fun scoreExe(
             file: FileData,
             gameName: String,
-            hasExeFlag: Boolean
+            hasExeFlag: Boolean,
         ): Int {
             var s = 0
             val path = file.fileName.lowercase()
 
             // 1️⃣ UE shipping or binaries folder bonus
-            if (UE_SHIPPING.matches(path))      s += 300
+            if (UE_SHIPPING.matches(path)) s += 300
             if (UE_BINARIES.containsMatchIn(path)) s += 250
 
             // 2️⃣ root-folder exe bonus
-            if (!path.contains('/'))            s += 200
+            if (!path.contains('/')) s += 200
 
             // 3️⃣ filename contains the game / installDir
-            if (path.contains(gameName) || fuzzyMatch(path, gameName))  s += 100
+            if (path.contains(gameName) || fuzzyMatch(path, gameName)) s += 100
 
             // 4️⃣ obvious tool / crash-dumper penalty
             if (NEGATIVE_KEYWORDS.any { it in path }) s -= 150
-            if (GENERIC_NAME.matches(file.fileName))                    s -= 200   // ← new
+            if (GENERIC_NAME.matches(file.fileName)) s -= 200 // ← new
 
             // 5️⃣ Executable | CustomExecutable flag
-            if (hasExeFlag)                     s += 50
+            if (hasExeFlag) s += 50
 
             return s
         }
@@ -481,14 +496,14 @@ class SteamService : Service(), IChallengeUrlChanged {
         /** select the primary binary */
         fun choosePrimaryExe(
             files: List<FileData>?,
-            gameName: String
+            gameName: String,
         ): FileData? = files?.maxWithOrNull { a, b ->
-            val sa = scoreExe(a, gameName, isExecutable(a.flags))   // <- fixed
+            val sa = scoreExe(a, gameName, isExecutable(a.flags)) // <- fixed
             val sb = scoreExe(b, gameName, isExecutable(b.flags))
 
             when {
-                sa != sb -> sa - sb                                 // higher score wins
-                else     -> (a.totalSize - b.totalSize).toInt()     // tie-break on size
+                sa != sb -> sa - sb // higher score wins
+                else -> (a.totalSize - b.totalSize).toInt() // tie-break on size
             }
         }
 
@@ -504,11 +519,13 @@ class SteamService : Service(), IChallengeUrlChanged {
             val appInfo = getAppInfoOf(appId) ?: return ""
 
             val installDir = appInfo.config.installDir.ifEmpty { appInfo.name }
-            val root       = Paths.get(PrefManager.appInstallPath, installDir)
+            val root = Paths.get(PrefManager.appInstallPath, installDir)
 
             val depots = appInfo.depots.values.filter { d ->
-                !d.sharedInstall && (d.osList.isEmpty() ||
-                        d.osList.any { it.name.equals("windows", true) || it.name.equals("none", true) })
+                !d.sharedInstall && (
+                    d.osList.isEmpty() ||
+                        d.osList.any { it.name.equals("windows", true) || it.name.equals("none", true) }
+                    )
             }
             Timber.i("Depots considered: $depots")
 
@@ -520,7 +537,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             /* stub detector (same short rules) */
             val generic = Regex("^[a-z]\\d{1,3}\\.exe$", RegexOption.IGNORE_CASE)
-            val bad     = listOf("launcher","steam","crash","handler","setup","unins","eac")
+            val bad = listOf("launcher", "steam", "crash", "handler", "setup", "unins", "eac")
             fun FileData.isStub(): Boolean {
                 val n = fileName.lowercase()
                 val stub = generic.matches(n) || bad.any { it in n } || totalSize < 1_000_000
@@ -529,7 +546,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             }
 
             /* ---------------------------------------------------------- */
-            val flagged = mutableListOf<Pair<FileData, Long>>()   // (file, depotSize)
+            val flagged = mutableListOf<Pair<FileData, Long>>() // (file, depotSize)
             var largestDepotSize = 0L
 
             val provider = ThreadSafeManifestProvider(File(depotManifestsPath).toPath())
@@ -546,7 +563,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     f.fileName.lowercase() in launchTargets && !f.isStub()
                 }?.let {
                     Timber.i("Picked via launch entry: ${it.fileName}")
-                    return it.fileName.replace('\\','/').toString()
+                    return it.fileName.replace('\\', '/').toString()
                 }
 
                 /* collect for later */
@@ -559,7 +576,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             /* 2️⃣ scorer (unchanged) */
             choosePrimaryExe(flagged.map { it.first }, installDir.lowercase())?.let {
                 Timber.i("Picked via scorer: ${it.fileName}")
-                return it.fileName.replace('\\','/').toString()
+                return it.fileName.replace('\\', '/').toString()
             }
 
             /* 3️⃣ fallback: biggest exe from the biggest depot */
@@ -568,14 +585,16 @@ class SteamService : Service(), IChallengeUrlChanged {
                 .maxByOrNull { it.first.totalSize }
                 ?.let {
                     Timber.i("Picked via largest-depot fallback: ${it.first.fileName}")
-                    return it.first.fileName.replace('\\','/').toString()
+                    return it.first.fileName.replace('\\', '/').toString()
                 }
 
             /* 4️⃣ last resort */
             Timber.w("No executable found; falling back to install dir")
-            return (getAppInfoOf(appId)?.let { appInfo ->
-                getWindowsLaunchInfos(appId).firstOrNull()
-            })?.executable ?: ""
+            return (
+                getAppInfoOf(appId)?.let { appInfo ->
+                    getWindowsLaunchInfos(appId).firstOrNull()
+                }
+                )?.executable ?: ""
         }
 
         fun deleteApp(appId: Int): Boolean {
@@ -696,7 +715,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 depotIds.map { depotId ->
                     async(Dispatchers.IO) {
                         val result = try {
-                            withTimeout(1_000) {          // 5 s is enough for a normal reply
+                            withTimeout(1_000) { // 5 s is enough for a normal reply
                                 steamApps.getDepotDecryptionKey(depotId, appId)
                                     .await()
                                     .result
@@ -719,47 +738,51 @@ class SteamService : Service(), IChallengeUrlChanged {
             Timber.i("Starting download for $appId")
 
             val info = DownloadInfo(entitledDepotIds.size).also { di ->
-                di.setDownloadJob(CoroutineScope(Dispatchers.IO).launch {
-
-                    coroutineScope {
-                        entitledDepotIds.mapIndexed { idx, depotId ->
-                            async {
-                                depotGate.acquire()               // ── enter gate
-                                var success = false
-                                try {
-                                    success = retry(times = 3, backoffMs = 2_000) {
-                                        ContentDownloader(instance!!.steamClient!!)
-                                            .downloadApp(
-                                                appId         = appId,
-                                                depotId       = depotId,
-                                                installPath   = PrefManager.appInstallPath,
-                                                stagingPath   = PrefManager.appStagingPath,
-                                                branch        = branch,
-                                                maxDownloads  = CHUNKS_PER_DEPOT,
-                                                onDownloadProgress = { p ->
-                                                    di.setProgress(p, idx)
-                                                },
-                                                parentScope   = this,
-                                            ).await()
+                di.setDownloadJob(
+                    CoroutineScope(Dispatchers.IO).launch {
+                        coroutineScope {
+                            entitledDepotIds.mapIndexed { idx, depotId ->
+                                async {
+                                    depotGate.acquire() // ── enter gate
+                                    var success = false
+                                    try {
+                                        success = retry(times = 3, backoffMs = 2_000) {
+                                            ContentDownloader(instance!!.steamClient!!)
+                                                .downloadApp(
+                                                    appId = appId,
+                                                    depotId = depotId,
+                                                    installPath = PrefManager.appInstallPath,
+                                                    stagingPath = PrefManager.appStagingPath,
+                                                    branch = branch,
+                                                    maxDownloads = CHUNKS_PER_DEPOT,
+                                                    onDownloadProgress = { p ->
+                                                        di.setProgress(p, idx)
+                                                    },
+                                                    parentScope = this,
+                                                ).await()
+                                        }
+                                        if (success) {
+                                            di.setProgress(1f, idx) // finished depot
+                                        } else {
+                                            Timber.w("Depot $depotId skipped after retries")
+                                        }
+                                    } finally {
+                                        depotGate.release() // ── leave gate
                                     }
-                                    if (success) di.setProgress(1f, idx)      // finished depot
-                                    else    Timber.w("Depot $depotId skipped after retries")
-                                } finally {
-                                    depotGate.release()           // ── leave gate
                                 }
-                            }
-                        }.awaitAll()
-                    }
-                    downloadJobs.remove(appId)
-                    // Write complete marker on disk
-                    try {
-                        val dir = File(getAppDirPath(appId))
-                        dir.mkdirs()
-                        File(dir, DOWNLOAD_COMPLETE_MARKER).createNewFile()
-                    } catch (e: Exception) {
-                        Timber.e(e, "Failed to write download complete marker for $appId")
-                    }
-                })
+                            }.awaitAll()
+                        }
+                        downloadJobs.remove(appId)
+                        // Write complete marker on disk
+                        try {
+                            val dir = File(getAppDirPath(appId))
+                            dir.mkdirs()
+                            File(dir, DOWNLOAD_COMPLETE_MARKER).createNewFile()
+                        } catch (e: Exception) {
+                            Timber.e(e, "Failed to write download complete marker for $appId")
+                        }
+                    },
+                )
             }
 
             downloadJobs[appId] = info
@@ -767,23 +790,22 @@ class SteamService : Service(), IChallengeUrlChanged {
             val sizes = entitledDepotIds.map { depotId ->
                 val depot = getAppInfoOf(appId)!!.depots[depotId]!!
 
-                val mInfo   = depot.manifests[branch]
+                val mInfo = depot.manifests[branch]
                     ?: depot.encryptedManifests[branch]
                     ?: return@map 1L
 
-                (mInfo.size ?: 1).toLong()         // Steam’s VDF exposes this
+                (mInfo.size ?: 1).toLong() // Steam’s VDF exposes this
             }
             sizes.forEachIndexed { i, bytes -> info.setWeight(i, bytes) }
             info.addProgressListener { p ->
                 val percent = (p * 100).toInt()
-                if (percent != lastPercent) {          // only when it really changed
+                if (percent != lastPercent) { // only when it really changed
                     lastPercent = percent
                     instance?.notificationHelper?.notify("Downloading: $percent%")
                 }
             }
             return info
         }
-
 
         private suspend fun retry(
             times: Int,
@@ -796,7 +818,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             }
             return block()
         }
-
 
         fun getWindowsLaunchInfos(appId: Int): List<LaunchInfo> {
             return getAppInfoOf(appId)?.let { appInfo ->

@@ -1,5 +1,5 @@
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -16,7 +16,9 @@ val keystoreProperties: Properties? = if (keystorePropertiesFile.exists()) {
     Properties().apply {
         load(FileInputStream(keystorePropertiesFile))
     }
-} else null
+} else {
+    null
+}
 
 // Add PostHog API key and host as build-time variables
 val posthogApiKey: String = project.findProperty("POSTHOG_API_KEY") as String? ?: System.getenv("POSTHOG_API_KEY") ?: ""
@@ -145,7 +147,7 @@ android {
     dynamicFeatures += setOf(":ubuntufs")
 
     kotlinter {
-        ignoreFormatFailures  = false
+        ignoreFormatFailures = false
     }
 
     // cmake on release builds a proot that fails to process ld-2.31.so

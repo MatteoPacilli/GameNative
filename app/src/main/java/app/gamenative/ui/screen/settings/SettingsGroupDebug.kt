@@ -15,12 +15,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import coil.annotation.ExperimentalCoilApi
-import coil.imageLoader
 import app.gamenative.service.SteamService
 import app.gamenative.ui.component.dialog.CrashLogDialog
 import app.gamenative.ui.theme.settingsTileColors
 import app.gamenative.ui.theme.settingsTileColorsDebug
+import coil.annotation.ExperimentalCoilApi
+import coil.imageLoader
 import com.alorma.compose.settings.ui.SettingsGroup
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import java.io.File

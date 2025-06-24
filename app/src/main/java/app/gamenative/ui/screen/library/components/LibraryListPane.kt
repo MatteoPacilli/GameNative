@@ -42,11 +42,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.gamenative.data.LibraryItem
 import app.gamenative.service.SteamService
+import app.gamenative.ui.component.topbar.AccountButton
 import app.gamenative.ui.data.LibraryState
 import app.gamenative.ui.enums.AppFilter
 import app.gamenative.ui.internal.fakeAppInfo
 import app.gamenative.ui.theme.PluviaTheme
-import app.gamenative.ui.component.topbar.AccountButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,18 +81,18 @@ internal fun LibraryListPane(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
+                .padding(top = paddingValues.calculateTopPadding()),
         ) {
             // Modern Header with gradient
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
                 ) {
                     Column {
                         Text(
@@ -102,15 +102,15 @@ internal fun LibraryListPane(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
                                         MaterialTheme.colorScheme.primary,
-                                        MaterialTheme.colorScheme.tertiary
-                                    )
-                                )
-                            )
+                                        MaterialTheme.colorScheme.tertiary,
+                                    ),
+                                ),
+                            ),
                         )
                         Text(
                             text = "${state.appInfoList.size} games • $installedCount installed",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
 
@@ -119,11 +119,11 @@ internal fun LibraryListPane(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                            .padding(8.dp)
+                            .padding(8.dp),
                     ) {
                         AccountButton(
                             onSettings = onSettings,
-                            onLogout = onLogout
+                            onLogout = onLogout,
                         )
                     }
                 }
@@ -133,7 +133,7 @@ internal fun LibraryListPane(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
             ) {
                 LibrarySearchBar(
                     state = state,
@@ -156,7 +156,7 @@ internal fun LibraryListPane(
                     contentPaddingValues = PaddingValues(
                         start = 20.dp,
                         end = 20.dp,
-                        bottom = 72.dp
+                        bottom = 72.dp,
                     ),
                     onItemClick = onNavigate,
                 )
@@ -172,7 +172,7 @@ internal fun LibraryListPane(
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(24.dp)
+                            .padding(24.dp),
                     )
                 }
 

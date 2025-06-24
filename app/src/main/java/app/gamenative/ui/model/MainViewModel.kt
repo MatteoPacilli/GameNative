@@ -24,6 +24,7 @@ import `in`.dragonbra.javasteam.steam.handlers.steamapps.AppProcessInfo
 import java.nio.file.Paths
 import javax.inject.Inject
 import kotlin.io.path.name
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlinx.coroutines.Job
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -198,10 +198,10 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             setShowBootingSplash(true)
             PluviaApp.events.emit(AndroidEvent.SetAllowedOrientation(PrefManager.allowedOrientation))
-            
+
             // Small delay to ensure the splash screen is visible before proceeding
             delay(100)
-            
+
             _uiEvent.send(MainUiEvent.LaunchApp)
         }
     }
@@ -221,7 +221,7 @@ class MainViewModel @Inject constructor(
             bootingSplashTimeoutJob?.cancel()
             bootingSplashTimeoutJob = null
             setShowBootingSplash(false)
-            
+
             SteamService.getAppInfoOf(appId)?.let { appInfo ->
                 // TODO: this should not be a search, the app should have been launched with a specific launch config that we then use to compare
                 val launchConfig = SteamService.getWindowsLaunchInfos(appId).firstOrNull {
@@ -264,7 +264,7 @@ class MainViewModel @Inject constructor(
             bootingSplashTimeoutJob?.cancel()
             bootingSplashTimeoutJob = null
             setShowBootingSplash(false)
-            
+
             // You could also show an error dialog here if needed
             Timber.e("Game launch error: $error")
         }

@@ -6,8 +6,11 @@ import android.provider.Settings
 import app.gamenative.service.SteamService
 import `in`.dragonbra.javasteam.util.HardwareUtils
 import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -15,9 +18,6 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.name
 import timber.log.Timber
-import java.io.IOException
-import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 
 object SteamUtils {
 
@@ -57,7 +57,7 @@ object SteamUtils {
 
     private fun generateInterfacesFile(dllPath: Path) {
         val outFile = dllPath.parent.resolve("steam_interfaces.txt")
-        if (Files.exists(outFile)) return          // already generated on a previous boot
+        if (Files.exists(outFile)) return // already generated on a previous boot
 
         // -------- read DLL into memory ----------------------------------------
         val bytes = Files.readAllBytes(dllPath)
@@ -65,23 +65,24 @@ object SteamUtils {
 
         val sb = StringBuilder()
         fun flush() {
-            if (sb.length >= 10) {                 // only consider reasonably long strings
+            if (sb.length >= 10) { // only consider reasonably long strings
                 val candidate = sb.toString()
-                if (candidate.matches(Regex("^Steam[A-Za-z]+[0-9]{3}\$", RegexOption.IGNORE_CASE)))
+                if (candidate.matches(Regex("^Steam[A-Za-z]+[0-9]{3}\$", RegexOption.IGNORE_CASE))) {
                     strings += candidate
+                }
             }
             sb.setLength(0)
         }
 
         for (b in bytes) {
             val ch = b.toInt() and 0xFF
-            if (ch in 0x20..0x7E) {                // printable ASCII
+            if (ch in 0x20..0x7E) { // printable ASCII
                 sb.append(ch.toChar())
             } else {
                 flush()
             }
         }
-        flush()                                    // catch trailing string
+        flush() // catch trailing string
 
         if (strings.isEmpty()) {
             Timber.w("No Steam interface strings found in ${dllPath.fileName}")
@@ -107,7 +108,7 @@ object SteamUtils {
                     Paths.get(appDirPath).resolve("orig_dll_path.txt"),
                     listOf(relPath.toString()),
                     StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING
+                    StandardOpenOption.TRUNCATE_EXISTING,
                 )
             } catch (e: IOException) {
                 Timber.w(e, "Failed to back up ${dllPath.fileName}")

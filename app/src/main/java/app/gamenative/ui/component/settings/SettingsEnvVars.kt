@@ -35,7 +35,9 @@ fun SettingsEnvVars(
                         onEnvVarsChange(envVars)
                     },
                     action = envVarAction?.let {
-                        { envVarAction(identifier) }
+                        {
+                            envVarAction(identifier)
+                        }
                     },
                 )
             }
@@ -63,7 +65,9 @@ fun SettingsEnvVars(
                         onEnvVarsChange(envVars)
                     },
                     action = envVarAction?.let {
-                        { envVarAction(identifier) }
+                        {
+                            envVarAction(identifier)
+                        }
                     },
                 )
             }
@@ -81,7 +85,9 @@ fun SettingsEnvVars(
                             onEnvVarsChange(envVars)
                         },
                         action = envVarAction?.let {
-                            { envVarAction(identifier) }
+                            {
+                                envVarAction(identifier)
+                            }
                         },
                     )
                 } else {
@@ -95,7 +101,9 @@ fun SettingsEnvVars(
                             onEnvVarsChange(envVars)
                         },
                         action = envVarAction?.let {
-                            { envVarAction(identifier) }
+                            {
+                                envVarAction(identifier)
+                            }
                         },
                     )
                 }

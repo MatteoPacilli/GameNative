@@ -36,7 +36,7 @@ fun LibraryBottomSheet(
         Text(text = "App Type", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         FlowRow(
-           verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AppFilter.entries.forEach { appFilter ->
                 // TODO properly fix this (and the one below)
